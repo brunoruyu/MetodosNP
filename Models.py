@@ -18,7 +18,7 @@ def ConstRet(estimW,eventW,L1,L2):
     mu=np.mean(estimW,axis=0)
     ARestim=estimW-mu
     AR=eventW-mu
-    se2=(1/(L1-1))*np.sum(ARestim**2,axis=0)
+    se2=(1/(L1-1.0))*np.sum(ARestim**2,axis=0)
     #sigmae=np.std(estimW,axis=0) #este divide por L1, pero dividimos por L1-2
     sCAR2=(L2+1)*se2
     CAR=np.sum(AR,axis=0)
@@ -28,7 +28,7 @@ def ConstRet(estimW,eventW,L1,L2):
     return T
     
 def MktRet(estimW,eventW,estimMkt,eventMkt,ARestim,AR,L1,L2):
-    se2=(1/(L1-1))*np.sum(ARestim**2,axis=0)
+    se2=(1/(L1-1.0))*np.sum(ARestim**2,axis=0)
 #   sigmae=np.std(estimW,axis=0) #este divide por L1, pero dividimos por L1-2
     sCAR2=(L2+1)*se2
     CAR=np.sum(AR,axis=0)
@@ -60,9 +60,10 @@ def Rango(estimW,eventW,estimMkt,eventMkt,ARestim,AR,L1,L2,Activos):
         K[:,i] = order   #.argsort()
     
     Lm=(L1+L2+1)/2.0    
-    Kt=np.mean(K)
+    Kt=np.mean(K,axis=1)
     Kd=np.mean(K[L1:,:])
-    Z=np.sqrt(L2)*(Kd-Lm)/np.abs(Kt-Lm)
+    Kt=Kt-Lm
+    Z=np.sqrt(L2)*(Kd-Lm)/np.sqrt(np.sum(Kt**2)/(L1+L2))
 #    print('A',A)
 #    print('K',K)
 #    print(Lm,Kt,Kd,Z)
