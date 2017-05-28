@@ -7,8 +7,9 @@ Created on Mon May 22 17:33:44 2017
 import numpy as np
 import pandas as pd
 import Models
+import ModelsT0
 import ReadTP1
-
+import statsmodels.api as sm
 
 #Voy a armar 1000 experimentos
 #Cada Experimento tiene 100 Activos elegidos al azar
@@ -30,7 +31,7 @@ Samples,Activos,L1,L2=1000,100,250,10
 if(False): #True para Test
     archivo="testTP1.dat"
     maxAct,maxTime=3,7
-    Samples,Activos,L1,L2=1,3,4,2
+    Samples,Activos,L1,L2=10,3,4,2
    
 retdf=ReadTP1.ReadCsv(archivo) #ya vienen ordenados de pasado a futuro
 ret=np.array(retdf)
@@ -42,18 +43,9 @@ eventW=np.zeros((L2,Activos))
 estimMkt=np.zeros((L1,Activos))
 eventMkt=np.zeros((L2,Activos))
 T=np.zeros((Samples,4))
-
+T0=np.zeros((Samples,4))
 #print(exp)
 for s in range(0,Samples):
-    #exp[samp]=[np.random.randint(1,high=1077, size=(10)),
-     #   np.random.randint(1,high=2256, size=(10))]
-#    rAct=np.array(np.random.randint(1,high=maxAct, size=(Activos)))
-#    print("rAct listo")
-#    rTime=np.array(np.random.randint(1,high=maxTime, size=(Activos)))
-#    print("rTime listo")
-#    design=np.vstack((rAct, rTime))
-#    print("fin design")
-    #print(design.item(1,0,2)) #(sample,Act=0 o Tiempo=1,nro de Activo o fecha Inicio )    
     print(s)
     for i in range(0,Activos):
         
@@ -65,16 +57,23 @@ for s in range(0,Samples):
         estimMkt[:,i]=np.copy(ret[tinic:tinic+L1,-1])
         eventW[:,i]=np.copy(ret[tinic+L1:tinic+L1+L2,act])
         eventMkt[:,i]=np.copy(ret[tinic+L1:tinic+L1+L2,-1])
-           
-    print("Eventos Armados")       
+#    print("Eventos Armados")       
     
     T[s]=Models.CallModel(estimW,eventW,estimMkt,eventMkt,Activos)
+    T0[s]=ModelsT0.CallModelT0(estimW,eventW,estimMkt,eventMkt,Activos)
+    
     #el orden de T es Const,Mkt,Signo,Rango
 
-output = open('Salida100', 'w')    
-output.write(str(T))
-output.close()    
-#ret.to_csv('borrar.dat',sep='\t')
+w= (np.abs(T) > 1.96).sum(axis=0)
+w=w/Samples
+w0= (np.abs(T0) > 1.96).sum(axis=0)
+w0=w0/Samples
+print("w",w)
+print("w0",w0)
+np.savetxt('Out_100_10.dat', T, delimiter='\t')
+np.savetxt('Out_100_0.dat', T0, delimiter='\t')
+
+
 """        
         for j in range(0,L1):    
            estimW[j,i]=np.array(ret).item(tinic+j,act)

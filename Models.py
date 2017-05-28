@@ -18,7 +18,7 @@ def ConstRet(estimW,eventW,L1,L2):
     mu=np.mean(estimW,axis=0)
     ARestim=estimW-mu
     AR=eventW-mu
-    se2=(1/(L1-2))*np.sum(ARestim**2,axis=0)
+    se2=(1/(L1-1))*np.sum(ARestim**2,axis=0)
     #sigmae=np.std(estimW,axis=0) #este divide por L1, pero dividimos por L1-2
     sCAR2=(L2+1)*se2
     CAR=np.sum(AR,axis=0)
@@ -28,7 +28,7 @@ def ConstRet(estimW,eventW,L1,L2):
     return T
     
 def MktRet(estimW,eventW,estimMkt,eventMkt,ARestim,AR,L1,L2):
-    se2=(1/(L1-2))*np.sum(ARestim**2,axis=0)
+    se2=(1/(L1-1))*np.sum(ARestim**2,axis=0)
 #   sigmae=np.std(estimW,axis=0) #este divide por L1, pero dividimos por L1-2
     sCAR2=(L2+1)*se2
     CAR=np.sum(AR,axis=0)
@@ -54,7 +54,7 @@ def Signo(estimW,eventW,estimMkt,eventMkt,ARestim,AR,L1,L2,Activos):
 def Rango(estimW,eventW,estimMkt,eventMkt,ARestim,AR,L1,L2,Activos):
     A=np.concatenate((ARestim,AR),axis=0)
     K=A.copy()
-    for i in range(0,Activos):  #REVISAR EL ORDENAMIENTO
+    for i in range(0,Activos):  
         order = A[:,i].argsort()
         #print("i ",i,A[:,i],order)
         K[:,i] = order   #.argsort()
@@ -85,26 +85,15 @@ def CallModel(estimW,eventW,estimMkt,eventMkt,Activos):
     L1=len(estimW)
     L2=len(eventW)
     (ARestim,AR)=Calc_AR(estimW,eventW,estimMkt,eventMkt,L1,L2,Activos) 
-    print("Calc_AR listo")
+#    print("Calc_AR listo")
     
     TCR=ConstRet(estimW,eventW,L1,L2)
-    print("ConstRet listo")
+#    print("ConstRet listo")
     TMR=MktRet(estimW,eventW,estimMkt,eventMkt,ARestim,AR,L1,L2)
-    print("MktRet listo")
+#    print("MktRet listo")
     TSig=Signo(estimW,eventW,estimMkt,eventMkt,ARestim,AR,L1,L2,Activos)
-    print("Signo listo")
+#    print("Signo listo")
     TRan=Rango(estimW,eventW,estimMkt,eventMkt,ARestim,AR,L1,L2,Activos)    
-    print("Rango listo")
+#    print("Rango listo")
     return TCR,TMR,TSig,TRan    
         
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        # B= linearfit(TimeVect[k*n[i]:(k+1)*n[i]],Xt[k*n[i]:(k+1)*n[i],j])
