@@ -73,7 +73,10 @@ print("w0",w0)
 np.savetxt('Out_100_10.dat', T, delimiter='\t')
 np.savetxt('Out_100_0.dat', T0, delimiter='\t')
 
-
+print(np.mean(T,axis=0))
+print(np.std(T,axis=0))
+print(np.mean(T0,axis=0))
+print(np.std(T0,axis=0))
 """        
         for j in range(0,L1):    
            estimW[j,i]=np.array(ret).item(tinic+j,act)
