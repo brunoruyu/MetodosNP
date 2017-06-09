@@ -27,15 +27,19 @@ import statsmodels.api as sm
 #print(np.array(ret).item(2,1)) (tiempo,Activo)
 archivo="dataTP1.dat"
 maxAct,maxTime=1077,2256
-Samples,Activos,L1,L2=1000,100,250,10
+Samples,Activos,L1,L2=1000,150,250,10
+lamb,eta=0.1,0.5
 if(False): #True para Test
     archivo="testTP1.dat"
     maxAct,maxTime=3,7
-    Samples,Activos,L1,L2=10,3,4,2
+    Samples,Activos,L1,L2=1,3,4,2
    
 retdf=ReadTP1.ReadCsv(archivo) #ya vienen ordenados de pasado a futuro
 ret=np.array(retdf)
 print("Finished Reading")
+
+v=[]
+v= [ np.std(ret[:,j],ddof=1)  for j in range(0, Activos) ]
 
 design=np.zeros((2,Activos))
 estimW=np.zeros((L1,Activos))
@@ -45,8 +49,9 @@ eventMkt=np.zeros((L2,Activos))
 T=np.zeros((Samples,4))
 T0=np.zeros((Samples,4))
 #print(exp)
+
 for s in range(0,Samples):
-    print(s)
+    #print(s)
     for i in range(0,Activos):
         
         act=np.random.randint(1,high=maxAct) #int(design.item(0,i))
@@ -73,10 +78,7 @@ print("w0",w0)
 np.savetxt('Out_100_10.dat', T, delimiter='\t')
 np.savetxt('Out_100_0.dat', T0, delimiter='\t')
 
-print(np.mean(T,axis=0))
-print(np.std(T,axis=0))
-print(np.mean(T0,axis=0))
-print(np.std(T0,axis=0))
+
 """        
         for j in range(0,L1):    
            estimW[j,i]=np.array(ret).item(tinic+j,act)

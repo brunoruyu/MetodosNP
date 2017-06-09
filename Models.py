@@ -7,6 +7,7 @@ Created on Tue May 23 09:14:40 2017
 import numpy as np
 import pandas as pd
 import statsmodels.api as sm
+from scipy.stats import rankdata
 
 def linearfit (X,Y):
     X = sm.add_constant(X)
@@ -14,25 +15,25 @@ def linearfit (X,Y):
     results = model.fit()
     return results.params
 
-def ConstRet(estimW,eventW,L1,L2):
+def ConstRet(estimW,eventW,L1,L2,Activos):
     mu=np.mean(estimW,axis=0)
     ARestim=estimW-mu
     AR=eventW-mu
-    se2=(1/(L1-1.0))*np.sum(ARestim**2,axis=0)
+    se2=(1/(L1-2.0))*np.sum(ARestim**2,axis=0)
     #sigmae=np.std(estimW,axis=0) #este divide por L1, pero dividimos por L1-2
     sCAR2=(L2+1)*se2
     CAR=np.sum(AR,axis=0)
-    sCAAR2=np.sum(sCAR2)
+    sCAAR2=np.sum(sCAR2)/(Activos**2)
     CAAR=np.mean(CAR)
     T=CAAR/np.sqrt(sCAAR2)
     return T
     
-def MktRet(estimW,eventW,estimMkt,eventMkt,ARestim,AR,L1,L2):
-    se2=(1/(L1-1.0))*np.sum(ARestim**2,axis=0)
+def MktRet(estimW,eventW,estimMkt,eventMkt,ARestim,AR,L1,L2,Activos):
+    se2=(1/(L1-2.0))*np.sum(ARestim**2,axis=0)
 #   sigmae=np.std(estimW,axis=0) #este divide por L1, pero dividimos por L1-2
     sCAR2=(L2+1)*se2
     CAR=np.sum(AR,axis=0)
-    sCAAR2=np.sum(sCAR2)
+    sCAAR2=np.sum(sCAR2)/(Activos**2)
     CAAR=np.mean(CAR)
     T=CAAR/np.sqrt(sCAAR2)
 #    print(T)
@@ -55,9 +56,9 @@ def Rango(estimW,eventW,estimMkt,eventMkt,ARestim,AR,L1,L2,Activos):
     A=np.concatenate((ARestim,AR),axis=0)
     K=A.copy()
     for i in range(0,Activos):  
-        order = A[:,i].argsort()
+        #order = A[:,i].argsort()
         #print("i ",i,A[:,i],order)
-        K[:,i] = order   #.argsort()
+        K[:,i] =rankdata(A[:,i], method='ordinal') #order #.argsort()
     
     Lm=(L1+L2+1)/2.0    
     Kt=np.mean(K,axis=1)
@@ -87,10 +88,10 @@ def CallModel(estimW,eventW,estimMkt,eventMkt,Activos):
     L2=len(eventW)
     (ARestim,AR)=Calc_AR(estimW,eventW,estimMkt,eventMkt,L1,L2,Activos) 
 #    print("Calc_AR listo")
-    
-    TCR=ConstRet(estimW,eventW,L1,L2)
+
+    TCR=ConstRet(estimW,eventW,L1,L2,Activos)
 #    print("ConstRet listo")
-    TMR=MktRet(estimW,eventW,estimMkt,eventMkt,ARestim,AR,L1,L2)
+    TMR=MktRet(estimW,eventW,estimMkt,eventMkt,ARestim,AR,L1,L2,Activos)
 #    print("MktRet listo")
     TSig=Signo(estimW,eventW,estimMkt,eventMkt,ARestim,AR,L1,L2,Activos)
 #    print("Signo listo")

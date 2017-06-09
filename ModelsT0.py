@@ -6,18 +6,19 @@ Created on Tue May 23 09:14:40 2017
 """
 import numpy as np
 import Models
+from scipy.stats import rankdata
 
 def ConstRetT0(estimW,eventW,L1,L2,Activos):
     mu=np.mean(estimW,axis=0)
     ARestim=estimW-mu
     AR0=eventW[0]-mu
-    sAi=np.sqrt((1/(L1-1))*np.sum(ARestim**2,axis=0))
+    sAi=np.sqrt((1/(L1-2))*np.sum(ARestim**2,axis=0))
     AR0p=AR0/sAi
     T=np.sum(AR0p)/np.sqrt(Activos)
     return T
     
 def MktRetT0(estimW,eventW,estimMkt,eventMkt,ARestim,AR,L1,Activos):
-    sAi=np.sqrt((1/(L1-1))*np.sum(ARestim**2,axis=0))
+    sAi=np.sqrt((1/(L1-2))*np.sum(ARestim**2,axis=0))
     AR0p=AR[0]/sAi
     T=np.sum(AR0p)/np.sqrt(Activos)
     return T
@@ -38,9 +39,9 @@ def RangoT0(estimW,eventW,estimMkt,eventMkt,ARestim,AR,L1,L2,Activos):
     A=np.concatenate((ARestim,AR),axis=0)
     K=A.copy()
     for i in range(0,Activos):  
-        order = A[:,i].argsort()
+        #order = A[:,i].argsort()
         #print("i ",i,A[:,i],order)
-        K[:,i] = order   #.argsort()
+        K[:,i] =rankdata(A[:,i], method='ordinal') #order #.argsort()
 
     U=K/(L1+L2+1)
     V=U-0.5

@@ -25,6 +25,7 @@ def ReadCsv(archivo):
                    ,parse_dates=True)
 
     ret=ajustadf(df)
+
     return ret
     
 
