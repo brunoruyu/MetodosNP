@@ -27,9 +27,11 @@ import statsmodels.api as sm
 #print(np.array(ret).item(2,1)) (tiempo,Activo)
 archivo="dataTP1.dat"
 maxAct,maxTime=1077,2256
-Samples,Activos,L1,L2=1000,150,250,10
-lamb,eta=0.1,0.5
-if(False): #True para Test
+Samples,Activos,L1,L2=1000,100,250,10
+lamb,eta0=10.0,2
+
+Test=False
+if(Test): #True para Test
     archivo="testTP1.dat"
     maxAct,maxTime=3,7
     Samples,Activos,L1,L2=1,3,4,2
@@ -41,6 +43,7 @@ print("Finished Reading")
 v=[]
 v= [ np.std(ret[:,j],ddof=1)  for j in range(0, Activos) ]
 
+
 design=np.zeros((2,Activos))
 estimW=np.zeros((L1,Activos))
 eventW=np.zeros((L2,Activos))
@@ -48,7 +51,14 @@ estimMkt=np.zeros((L1,Activos))
 eventMkt=np.zeros((L2,Activos))
 T=np.zeros((Samples,4))
 T0=np.zeros((Samples,4))
-#print(exp)
+eta=np.zeros((L2,Activos))
+
+
+Parte2=True #poner True para correr el punto2
+if(Parte2):
+    etaT= [[ eta0*v[i]*np.exp(-j/lamb)  for i in range(0, Activos) ] for j in range(0, L2) ]
+    eta=np.array(etaT)
+
 
 for s in range(0,Samples):
     #print(s)
@@ -60,32 +70,30 @@ for s in range(0,Samples):
         
         estimW[:,i]=np.copy(ret[tinic:tinic+L1,act])
         estimMkt[:,i]=np.copy(ret[tinic:tinic+L1,-1])
-        eventW[:,i]=np.copy(ret[tinic+L1:tinic+L1+L2,act])
+        eventW[:,i]=np.copy(ret[tinic+L1:tinic+L1+L2,act])+eta[:,i]
         eventMkt[:,i]=np.copy(ret[tinic+L1:tinic+L1+L2,-1])
 #    print("Eventos Armados")       
-    
+
     T[s]=Models.CallModel(estimW,eventW,estimMkt,eventMkt,Activos)
     T0[s]=ModelsT0.CallModelT0(estimW,eventW,estimMkt,eventMkt,Activos)
     
     #el orden de T es Const,Mkt,Signo,Rango
 
-w= (np.abs(T) > 1.96).sum(axis=0)
-w=w/Samples
-w0= (np.abs(T0) > 1.96).sum(axis=0)
-w0=w0/Samples
-print("w",w)
-print("w0",w0)
-np.savetxt('Out_100_10.dat', T, delimiter='\t')
-np.savetxt('Out_100_0.dat', T0, delimiter='\t')
-
-
-"""        
-        for j in range(0,L1):    
-           estimW[j,i]=np.array(ret).item(tinic+j,act)
-           estimMkt[j,i]=np.array(ret).item(tinic+j,-1)
-           #print("estim",i,j,tinic+j,act,estimMkt[j,i])
-        for j in range(0,L2):             
-           eventW[j,i]=np.array(ret).item(tinic+j+L1,act)
-           eventMkt[j,i]=np.array(ret).item(tinic+j+L1,-1)
-           #print("event",i,j,tinic+L1+j,act,eventMkt[j,i])
-"""
+if(not Parte2):  #O sea, si estoy en la Parte1
+    w= (np.abs(T) > 1.96).sum(axis=0)
+    w=w/Samples
+    w0= (np.abs(T0) > 1.96).sum(axis=0)
+    w0=w0/Samples
+    print("w",w)
+    print("w0",w0)
+    #np.savetxt('Out_100_10.dat', T, delimiter='\t')
+    #np.savetxt('Out_100_0.dat', T0, delimiter='\t')
+else:
+    w= (T < 1.645).sum(axis=0)
+    w=w/Samples
+    w0= (T0 < 1.645).sum(axis=0)
+    w0=w0/Samples
+    print("w",w)
+    print("w0",w0)
+    np.savetxt('Out_100_10.dat', T, delimiter='\t')
+    np.savetxt('Out_100_0.dat', T0, delimiter='\t')
